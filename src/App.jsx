@@ -432,6 +432,7 @@ export default function App() {
       if (mainTitleRef.current) gsap.to(mainTitleRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
       if (nameBadgeRef.current) gsap.to(nameBadgeRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
       if (subHeadingRef.current) gsap.to(subHeadingRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
+      if (centerBioRef.current) gsap.to(centerBioRef.current, { opacity: 0, pointerEvents: 'none', duration: 0.3, overwrite: true });
       noteRefs.forEach((ref) => { if (ref.current) gsap.to(ref.current, { opacity: 0, scale: 0.5, duration: 0.3, ease: "power2.inOut", overwrite: true }); });
 
       wrappersRef.current.forEach((wrapper, index) => {

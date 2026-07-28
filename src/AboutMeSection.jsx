@@ -187,7 +187,7 @@ const AboutMeSection = React.forwardRef((props, ref) => {
                 if (typeof ref === 'function') ref(node);
                 else if (ref) ref.current = node;
             }} 
-            className="relative z-40 w-full min-h-screen text-[#FFEED6] overflow-hidden py-32"
+            className="relative z-40 w-full min-h-screen bg-[#120D0A] text-[#FFEED6] overflow-hidden py-32"
         >
             <div ref={bgRef} className="absolute inset-0 bg-[#120D0A] z-0 pointer-events-none"></div>
 

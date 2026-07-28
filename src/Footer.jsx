@@ -60,7 +60,7 @@ const Footer = () => {
     return (
         <footer 
             ref={containerRef} 
-            className="w-full bg-[#FFEED6] text-[#2E2019] pt-24 pb-12 overflow-hidden border-t-4 border-[#2E2019]"
+            className="relative z-40 w-full bg-[#FFEED6] text-[#2E2019] pt-24 pb-12 overflow-hidden border-t-4 border-[#2E2019]"
         >
             <div className="max-w-7xl mx-auto px-6 sm:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
                 
