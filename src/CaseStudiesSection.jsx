@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -20,9 +20,26 @@ export default function CaseStudiesSection() {
     const titleRef = useRef(null);
     const subTitleRef = useRef(null);
     const rowsRef = useRef([]);
+    const particleRefs = useRef([]);
 
-    // Intro scatter animation runs exactly once — never on back-navigation
-    const hasAnimatedRef = useRef(false);
+    // ── Stable particle data (seeded) ──────────────────────────────────────
+    const caseParticles = useMemo(() => {
+        const glyphs = ['{', '}', '=>', '//', '[]', '&&', ';', '()', '01', '/*'];
+        const rand = (() => { let s = 99; return () => { s = (s * 16807) % 2147483647; return (s-1)/2147483646; }; })();
+        return Array.from({ length: 32 }, (_, i) => ({
+            i,
+            isDot:   rand() < 0.4,
+            glyph:   glyphs[Math.floor(rand() * glyphs.length)],
+            x:       rand() * 100,
+            y:       rand() * 100,
+            size:    rand() < 0.4 ? 3 + rand() * 4 : 9 + rand() * 14,
+            opacity: 0.05 + rand() * 0.10,
+            color:   rand() > 0.5 ? '#E2725B' : '#2E2019',
+            driftX:  (rand() - 0.5) * 22,
+            driftY:  (rand() - 0.5) * 22,
+            dur:     5 + rand() * 9,
+        }));
+    }, []);
 
     const addToRowsRef = (el) => {
         if (el && !rowsRef.current.includes(el)) rowsRef.current.push(el);
@@ -141,6 +158,22 @@ export default function CaseStudiesSection() {
         });
     }, []); // empty deps — runs once on first mount, never again
 
+    // ── Particle float loops ──────────────────────────────────────────────
+    useGSAP(() => {
+        particleRefs.current.filter(Boolean).forEach((el, idx) => {
+            const p = caseParticles[idx];
+            if (!p) return;
+            gsap.to(el, {
+                x: p.driftX, y: p.driftY,
+                duration: p.dur,
+                ease: 'sine.inOut',
+                repeat: -1,
+                yoyo: true,
+                delay: -(p.dur * Math.random()),
+            });
+        });
+    }, { scope: containerRef });
+
     return (
         <>
             {/* ── Main section — always rendered so back-nav lands here ── */}
@@ -149,6 +182,49 @@ export default function CaseStudiesSection() {
                 ref={containerRef}
                 className="min-h-screen w-full bg-[#FFEED6] px-6 py-24 sm:px-16 flex flex-col items-center relative z-30 overflow-x-hidden"
             >
+                {/* ── Atmospheric code-glyph particles (CaseStudies only) ── */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+                    {caseParticles.map((p, idx) =>
+                        p.isDot ? (
+                            <div
+                                key={p.i}
+                                ref={el => { particleRefs.current[idx] = el; }}
+                                style={{
+                                    position: 'absolute',
+                                    left: `${p.x}%`,
+                                    top: `${p.y}%`,
+                                    width: `${p.size}px`,
+                                    height: `${p.size}px`,
+                                    borderRadius: '50%',
+                                    backgroundColor: p.color,
+                                    opacity: p.opacity,
+                                    willChange: 'transform',
+                                }}
+                            />
+                        ) : (
+                            <span
+                                key={p.i}
+                                ref={el => { particleRefs.current[idx] = el; }}
+                                style={{
+                                    position: 'absolute',
+                                    left: `${p.x}%`,
+                                    top: `${p.y}%`,
+                                    fontSize: `${p.size}px`,
+                                    color: p.color,
+                                    opacity: p.opacity,
+                                    fontFamily: "'Courier New', monospace",
+                                    fontWeight: 700,
+                                    lineHeight: 1,
+                                    userSelect: 'none',
+                                    willChange: 'transform',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {p.glyph}
+                            </span>
+                        )
+                    )}
+                </div>
                 <div className="w-full max-w-6xl flex flex-col items-end mb-16 select-none text-right">
                     <h2
                         ref={titleRef}

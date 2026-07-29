@@ -1,9 +1,8 @@
 // Import React hooks for managing state, effects, and DOM element references
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 // Import the video intro component
 import VideoIntro from "./VideoIntro";
 // Import React core library
-import React from "react";
 // Import GSAP library for smooth animations
 import gsap from "gsap";
 // Import ScrollTrigger plugin from GSAP
@@ -18,6 +17,7 @@ import { Home, User, FolderGit2, Briefcase, Mail } from "lucide-react";
 import CaseStudiesSection from "./CaseStudiesSection";
 import AboutMeSection from "./AboutMeSection";
 import Footer from "./Footer";
+import TechParticles from "./TechParticles";
 
 // Register ScrollTrigger and Observer plugins with GSAP engine
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -143,7 +143,6 @@ export default function App() {
 
   // Detect mobile
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
-  const [showMobileDisclaimer, setShowMobileDisclaimer] = useState(false);
   const aboutMeRef = useRef(null);
   // heroReady: gates the icon fade-in + Click Me animation.
   // Desktop: fires immediately after video. Mobile: fires after disclaimer is dismissed.
@@ -247,8 +246,33 @@ export default function App() {
       if (clickMeRef.current && !isScattered) {
         gsap.fromTo(clickMeRef.current, { opacity: 0, scale: 0.5, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, delay: 0.5, ease: "back.out(1.7)", overwrite: "auto" });
       }
+
+      // Scroll observer to update active nav tab
+      ScrollTrigger.create({
+        trigger: "body",
+        start: "top top",
+        end: 300,
+        onEnter: () => setActiveNavTab("home"),
+        onEnterBack: () => setActiveNavTab("home")
+      });
+
+      ScrollTrigger.create({
+        trigger: "#case-studies-section",
+        start: "top 50%",
+        end: "bottom 50%",
+        onEnter: () => setActiveNavTab("case-studies"),
+        onEnterBack: () => setActiveNavTab("case-studies")
+      });
+
+      ScrollTrigger.create({
+        trigger: "#about-me-section",
+        start: "top 50%",
+        end: "bottom 50%",
+        onEnter: () => setActiveNavTab("about"),
+        onEnterBack: () => setActiveNavTab("about")
+      });
     }
-  }, [heroReady]);
+  }, [heroReady, isScattered]);
 
   const handleContainerMouseEnter = contextSafe(() => {
     if (isScattered || isTidied) return;
@@ -325,7 +349,7 @@ export default function App() {
 
     wrappersRef.current.forEach((wrapper, index) => {
       const target = scatterTargets.current[index];
-      if (target && wrapper) gsap.to(wrapper, { x: target.x, y: target.y, rotation: target.rotation, scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.4)", overwrite: "auto" });
+      if (target && wrapper) gsap.to(wrapper, { x: target.x, y: target.y, rotation: target.rotation, scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.4)", overwrite: true });
     });
   });
 
@@ -384,7 +408,7 @@ export default function App() {
 
     wrappersRef.current.forEach((wrapper, index) => {
       const target = scatterTargets.current[index];
-      if (target && wrapper) gsap.to(wrapper, { x: target.x, y: target.y, rotation: target.rotation, scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.4)", overwrite: "auto" });
+      if (target && wrapper) gsap.to(wrapper, { x: target.x, y: target.y, rotation: target.rotation, scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.4)", overwrite: true });
     });
   });
 
@@ -432,6 +456,9 @@ export default function App() {
       if (mainTitleRef.current) gsap.to(mainTitleRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
       if (nameBadgeRef.current) gsap.to(nameBadgeRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
       if (subHeadingRef.current) gsap.to(subHeadingRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.3, ease: "power2.in", overwrite: true });
+      // Hide the whole title container so it can't bleed through z-stacking
+      const titleContainer = document.getElementById('main-title-container');
+      if (titleContainer) gsap.to(titleContainer, { autoAlpha: 0, duration: 0.3, overwrite: true });
       if (centerBioRef.current) gsap.to(centerBioRef.current, { opacity: 0, pointerEvents: 'none', duration: 0.3, overwrite: true });
       noteRefs.forEach((ref) => { if (ref.current) gsap.to(ref.current, { opacity: 0, scale: 0.5, duration: 0.3, ease: "power2.inOut", overwrite: true }); });
 
@@ -463,9 +490,12 @@ export default function App() {
       }
 
       const headerDelay = 0.25;
+      // Restore title container visibility
+      const titleContainer = document.getElementById('main-title-container');
+      if (titleContainer) gsap.to(titleContainer, { autoAlpha: 1, duration: 0.3, delay: headerDelay, overwrite: true });
       if (mainTitleRef.current) gsap.to(mainTitleRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.5, delay: headerDelay, ease: "power2.out", overwrite: "auto" });
       if (nameBadgeRef.current) gsap.to(nameBadgeRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.5, delay: headerDelay, ease: "power2.out", overwrite: "auto" });
-      if (subHeadingRef.current) gsap.to(subHeadingRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.5, delay: headerDelay, ease: "power2.out", overwrite: "auto" });
+      if (subHeadingRef.current) gsap.to(subHeadingRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.5, delay: headerDelay + 0.35, ease: "back.out(1.5)", overwrite: "auto" });
       noteRefs.forEach((ref) => { if (ref.current) gsap.to(ref.current, { opacity: 1, scale: 1, duration: 0.4, delay: headerDelay, ease: "power2.out", overwrite: "auto" }); });
 
       wrappersRef.current.forEach((wrapper, index) => {
@@ -559,6 +589,10 @@ export default function App() {
 
   const handleNavClick = (e, id) => {
     e.stopPropagation();
+    if (id === "resume") {
+      window.open("https://drive.usercontent.google.com/download?id=1J9eMbBf62-NYkyTMx_HyjAC6XcZQTKZV&export=download&authuser=0", "_blank");
+      return;
+    }
     setActiveNavTab(id);
     if (id === "home") {
       handleTidyFlanks(false);
@@ -584,6 +618,9 @@ export default function App() {
     <div className="bg-[#FFEED6] min-h-screen w-full relative overflow-x-hidden">
       <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet" />
 
+      {/* Atmospheric floating tech particles */}
+      <TechParticles />
+
       <div className="pointer-events-none fixed inset-0 z-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.12)]" />
 
       <div
@@ -599,64 +636,23 @@ export default function App() {
       {!introDone && (
         <VideoIntro isActive={isTabActive} onComplete={() => {
           setIntroDone(true);
-          if (window.innerWidth < 640) {
-            // Mobile: show disclaimer first — heroReady fires after Got it
-            setShowMobileDisclaimer(true);
-          } else {
-            // Desktop: start hero animation immediately
-            setHeroReady(true);
-          }
+          setHeroReady(true);
         }} />
       )}
 
-      {/* ── Mobile Disclaimer ── */}
-      {showMobileDisclaimer && (
-        <div
-          className="fixed inset-0 z-[9998] flex items-center justify-center px-8"
-          style={{
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            background: "rgba(255, 238, 214, 0.92)"
-          }}
-        >
-          <div className="text-center max-w-sm">
-            <div className="text-4xl mb-4">📱</div>
-            <p className="font-['Fredoka'] text-[#2E2019] text-xl font-bold leading-snug mb-4">
-              You are reviewing this portfolio on a Mobile Phone?
-            </p>
-            <p className="font-['Fredoka'] text-[#2E2019] text-lg font-bold leading-relaxed mb-2">
-              Due to less space on this screen you are missing a lot.
-            </p>
-            <p className="font-['Fredoka'] text-[#2E2019] text-lg font-bold leading-relaxed mb-6">
-              Prefer you to review this on a Laptop or bigger screen.
-            </p>
-            <p className="font-['Fredoka'] text-[#2E2019] text-xl font-bold">
-              Thankyou
-            </p>
-            <button
-              onClick={() => {
-                setShowMobileDisclaimer(false);
-                setHeroReady(true);
-              }}
-              className="mt-7 bg-[#2E2019] text-[#FFEED6] font-['Fredoka'] font-bold px-8 py-3 rounded-full text-lg shadow-xl active:scale-95 transition-transform"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Mobile disclaimer removed to allow mobile access */}
 
       {introDone && (
         <nav ref={glassNavRef} className="fixed top-6 left-6 z-50 select-none pointer-events-auto max-w-[calc(100vw-3rem)]" onClick={(e) => e.stopPropagation()}>
           <div className="relative flex flex-col items-start gap-3">
             <div className="flex items-center gap-3">
-              <GlassNavItem item={cornerNavItem} isActive={activeNavTab === cornerNavItem.id} onClick={(e) => handleNavClick(e, cornerNavItem.id)} tooltipPosition="bottom" />
-              <GlassNavItem ref={aboutNavRef} item={rightNavItems[0]} isActive={activeNavTab === rightNavItems[0].id} onClick={(e) => handleNavClick(e, rightNavItems[0].id)} tooltipPosition="bottom" />
-              <GlassNavItem ref={caseStudiesNavRef} item={rightNavItems[1]} isActive={activeNavTab === rightNavItems[1].id} onClick={(e) => handleNavClick(e, rightNavItems[1].id)} tooltipPosition="bottom" />
+              <GlassNavItem item={cornerNavItem} isActive={activeNavTab === cornerNavItem.id} isDarkBg={activeNavTab === 'about'} onClick={(e) => handleNavClick(e, cornerNavItem.id)} tooltipPosition="bottom" />
+              <GlassNavItem ref={aboutNavRef} item={rightNavItems[0]} isActive={activeNavTab === rightNavItems[0].id} isDarkBg={activeNavTab === 'about'} onClick={(e) => handleNavClick(e, rightNavItems[0].id)} tooltipPosition="bottom" />
+              <GlassNavItem ref={caseStudiesNavRef} item={rightNavItems[1]} isActive={activeNavTab === rightNavItems[1].id} isDarkBg={activeNavTab === 'about'} onClick={(e) => handleNavClick(e, rightNavItems[1].id)} tooltipPosition="bottom" />
             </div>
             <div className="flex flex-col gap-3">
-              <GlassNavItem ref={resumeNavRef} item={downNavItems[0]} isActive={activeNavTab === downNavItems[0].id} onClick={(e) => handleNavClick(e, downNavItems[0].id)} tooltipPosition="right" />
-              <GlassNavItem ref={contactNavRef} item={downNavItems[1]} isActive={activeNavTab === downNavItems[1].id} onClick={(e) => handleNavClick(e, downNavItems[1].id)} tooltipPosition="right" />
+              <GlassNavItem ref={resumeNavRef} item={downNavItems[0]} isActive={activeNavTab === downNavItems[0].id} isDarkBg={activeNavTab === 'about'} onClick={(e) => handleNavClick(e, downNavItems[0].id)} tooltipPosition="right" />
+              <GlassNavItem ref={contactNavRef} item={downNavItems[1]} isActive={activeNavTab === downNavItems[1].id} isDarkBg={activeNavTab === 'about'} onClick={(e) => handleNavClick(e, downNavItems[1].id)} tooltipPosition="right" />
             </div>
           </div>
         </nav>
@@ -679,24 +675,19 @@ export default function App() {
             </div>
           </div>
 
-          <div id="main-title-container" className="absolute -top-40 sm:-top-36 flex flex-col items-center justify-center text-center z-40 pointer-events-none select-none w-screen p-2 overflow-hidden">
+          <div id="main-title-container" className="absolute -top-40 sm:-top-36 flex flex-col items-center justify-center text-center z-40 pointer-events-none select-none w-screen p-2">
             <div id="name-badge-container" ref={nameBadgeRef} className="opacity-0 mb-3 sm:mb-4 bg-[#2E2019] text-[#FFEED6] px-6 py-2.5 sm:px-8 sm:py-3 rounded-2xl shadow-[0_10px_30px_rgba(46,32,25,0.2)] font-['Fredoka'] text-sm sm:text-xl font-bold tracking-wide pointer-events-none">
               <span>Hey!! I am Ayush👋</span>
             </div>
-            <div id="main-title-text" ref={mainTitleRef} className="opacity-0 bg-[#2E2019] text-[#FFEED6] px-6 py-5 sm:px-12 sm:py-8 rounded-[2rem] shadow-[0_20px_50px_rgba(46,32,25,0.28)] font-['Fredoka'] text-base sm:text-3xl font-black tracking-wide w-[88%] sm:w-[48%] lg:w-[42%] mb-3 sm:mb-5 leading-snug flex flex-wrap justify-center overflow-hidden relative z-20 pointer-events-none">
-              {/* On mobile render word-by-word to prevent mid-word line breaks; on desktop render char-by-char for scroll animation */}
-              {isMobile
-                ? headlineText.split(" ").map((word, i, arr) => (
-                    <span key={i} className="scroll-char inline-block">{word}{i < arr.length - 1 ? "\u00A0" : ""}</span>
-                  ))
-                : headlineText.split("").map((char, index) => (
-                    <span key={index} className="scroll-char inline-block" style={{ width: char === " " ? "0.28em" : "auto" }}>
-                      {char === " " ? "\u00A0" : char}
-                    </span>
-                  ))
-              }
+            <div id="main-title-text" ref={mainTitleRef} className="opacity-0 bg-[#2E2019] text-[#FFEED6] px-6 py-5 sm:px-12 sm:py-8 rounded-[2rem] shadow-[0_20px_50px_rgba(46,32,25,0.28)] font-['Fredoka'] text-base sm:text-3xl font-black tracking-wide max-w-[90vw] sm:max-w-[600px] mb-3 sm:mb-5 leading-snug flex flex-wrap justify-center relative z-20 pointer-events-none">
+              {/* Always render word-by-word to prevent mid-word breaks; char-spans still exist for GSAP targeting */}
+              {headlineText.split(" ").map((word, i, arr) => (
+                  <span key={i} className="scroll-char inline-block whitespace-nowrap">
+                    {word}{i < arr.length - 1 ? "\u00A0" : ""}
+                  </span>
+              ))}
             </div>
-            <div id="sub-heading-container" ref={subHeadingRef} className="opacity-0 mt-1 sm:mt-4 bg-[#2E2019] text-[#FFEED6] px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-2xl font-['Fredoka'] text-sm sm:text-2xl font-bold tracking-wide whitespace-nowrap relative z-10 pointer-events-none">
+            <div id="sub-heading-container" ref={subHeadingRef} className="opacity-0 mt-1 sm:mt-4 bg-[#2E2019] text-[#FFEED6] px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-2xl font-['Fredoka'] text-sm sm:text-2xl font-bold tracking-wide whitespace-nowrap max-w-[92vw] relative z-10 pointer-events-none">
               <span id="sub-heading-text">Scroll Down To Unscatter</span>
             </div>
           </div>
@@ -737,6 +728,10 @@ export default function App() {
                         aboutMeRef.current.scrollIntoView({ behavior: 'smooth' });
                       }, 100);
                     }
+                  } else if (item.isResume) {
+                    window.open("https://drive.usercontent.google.com/download?id=1J9eMbBf62-NYkyTMx_HyjAC6XcZQTKZV&export=download&authuser=0", "_blank");
+                  } else if (item.link) {
+                    window.open(item.link, "_blank");
                   }
                 }
               }}
@@ -851,15 +846,19 @@ export default function App() {
   );
 }
 
-const GlassNavItem = React.forwardRef(({ item, isActive, onClick, tooltipPosition }, ref) => {
+const GlassNavItem = forwardRef(({ item, isActive, isDarkBg, onClick, tooltipPosition }, ref) => {
   const Icon = item.icon;
   const tooltipPosClass = tooltipPosition === "right" ? "left-full ml-3 top-1/2 -translate-y-1/2" : "top-full mt-3 left-1/2 -translate-x-1/2";
+  
+  const inactiveBg = isDarkBg ? "bg-[#FFEED6]/10 border-[#FFEED6]/20 hover:bg-[#FFEED6]/25 hover:border-[#FFEED6]/50" : "bg-[#2E2019]/15 border-[#2E2019]/20 hover:bg-[#2E2019]/30 hover:border-[#2E2019]/40";
+  const inactiveText = isDarkBg ? "text-[#FFEED6]/80 hover:text-[#FFEED6]" : "text-[#2E2019]/80 hover:text-[#2E2019]";
+
   return (
     <div ref={ref} className="relative group">
-      <button onClick={onClick} className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ease-out bg-[#2E2019]/15 backdrop-blur-2xl border border-[#FFEED6]/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] hover:bg-[#2E2019]/40 hover:scale-110 hover:border-[#FFEED6]/60 active:scale-95 ${isActive ? "bg-[#FFEED6] border-[#FFEED6]/80 shadow-[0_0_25px_rgba(255,238,214,0.2)] text-[#2E2019]" : "text-[#2E2019]/80 hover:text-[#2E2019]"}`}>
-        <Icon className="w-5 h-5 stroke-[2] drop-shadow-sm text-[#2E2019]" />
+      <button onClick={onClick} className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-500 ease-out backdrop-blur-2xl border ${isActive ? "bg-[#E2725B] scale-110 border-[#E2725B] shadow-[0_0_20px_rgba(226,114,91,0.6)] text-[#FFEED6]" : `${inactiveBg} shadow-lg active:scale-95 hover:scale-110 ${inactiveText}`}`}>
+        <Icon className={`w-5 h-5 stroke-[2] drop-shadow-sm transition-colors duration-500 ${isActive ? "text-[#FFEED6]" : (isDarkBg ? "text-[#FFEED6]" : "text-[#2E2019]")}`} />
       </button>
-      <div className={`absolute pointer-events-none opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out z-50 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap bg-[#2E2019]/90 text-[#FFEED6] border border-[#FFEED6]/20 backdrop-blur-md shadow-lg ${tooltipPosClass}`}>{item.label}</div>
+      <div className={`absolute pointer-events-none opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out z-50 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap backdrop-blur-md shadow-lg ${isDarkBg ? "bg-[#FFEED6]/90 text-[#120D0A] border-[#120D0A]/20" : "bg-[#2E2019]/90 text-[#FFEED6] border-[#FFEED6]/20"} ${tooltipPosClass}`}>{item.label}</div>
     </div>
   );
 });
