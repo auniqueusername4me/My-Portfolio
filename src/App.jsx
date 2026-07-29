@@ -143,6 +143,8 @@ export default function App() {
 
   // Detect mobile
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [showMobileDisclaimer, setShowMobileDisclaimer] = useState(false);
+  const disclaimerRef = useRef(null);
   const aboutMeRef = useRef(null);
   // heroReady: gates the icon fade-in + Click Me animation.
   // Desktop: fires immediately after video. Mobile: fires after disclaimer is dismissed.
@@ -157,6 +159,12 @@ export default function App() {
   // Keep refs in sync with state so event listeners always read the latest values
   useEffect(() => { isTidiedRef.current = isTidied; }, [isTidied]);
   useEffect(() => { isScatteredRef.current = isScattered; }, [isScattered]);
+
+  useGSAP(() => {
+    if (showMobileDisclaimer && disclaimerRef.current) {
+      gsap.fromTo(disclaimerRef.current, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" });
+    }
+  }, [showMobileDisclaimer]);
 
   // --- CENTRALIZED SCROLL LOCK LOGIC ---
   useEffect(() => {
@@ -636,11 +644,61 @@ export default function App() {
       {!introDone && (
         <VideoIntro isActive={isTabActive} onComplete={() => {
           setIntroDone(true);
-          setHeroReady(true);
+          if (window.innerWidth < 640) {
+            // Mobile: show disclaimer first — heroReady fires after Got it
+            setShowMobileDisclaimer(true);
+          } else {
+            // Desktop: start hero animation immediately
+            setHeroReady(true);
+          }
         }} />
       )}
 
-      {/* Mobile disclaimer removed to allow mobile access */}
+      {/* ── Mobile Disclaimer ── */}
+      {showMobileDisclaimer && (
+        <div
+          ref={disclaimerRef}
+          className="fixed inset-0 z-[9998] flex items-center justify-center px-8 opacity-0"
+          style={{
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            background: "rgba(255, 238, 214, 0.92)"
+          }}
+        >
+          <div className="text-center max-w-sm">
+            <div className="text-4xl mb-4">📱</div>
+            <p className="font-['Fredoka'] text-[#2E2019] text-xl font-bold leading-snug mb-4">
+              You are reviewing this portfolio on a Mobile Phone?
+            </p>
+            <p className="font-['Fredoka'] text-[#2E2019] text-lg font-bold leading-relaxed mb-2">
+              Due to less space on this screen you are missing a lot.
+            </p>
+            <p className="font-['Fredoka'] text-[#2E2019] text-lg font-bold leading-relaxed mb-6">
+              Prefer you to review this on a Laptop or bigger screen.
+            </p>
+            <p className="font-['Fredoka'] text-[#2E2019] text-xl font-bold">
+              Thankyou
+            </p>
+            <button
+              onClick={() => {
+                gsap.to(disclaimerRef.current, { 
+                  opacity: 0, 
+                  scale: 0.95, 
+                  duration: 0.4, 
+                  ease: "power2.in", 
+                  onComplete: () => {
+                    setShowMobileDisclaimer(false);
+                    setHeroReady(true);
+                  }
+                });
+              }}
+              className="mt-7 bg-[#2E2019] text-[#FFEED6] font-['Fredoka'] font-bold px-8 py-3 rounded-full text-lg shadow-xl active:scale-95 transition-transform"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {introDone && (
         <nav ref={glassNavRef} className="fixed top-6 left-6 z-50 select-none pointer-events-auto max-w-[calc(100vw-3rem)]" onClick={(e) => e.stopPropagation()}>
