@@ -164,15 +164,15 @@ const Footer = () => {
                 {/* Left Column: THE END */}
                 <div
                     ref={leftColRef}
-                    className="lg:col-span-3 flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1"
+                    className="lg:col-span-3 flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1 relative lg:-left-12"
                 >
                     <h2
                         ref={theEndRef}
-                        className="font-['Fredoka'] text-5xl sm:text-6xl lg:text-7xl font-black mb-4 tracking-wide text-[#E2725B]"
+                        className="font-['Fredoka'] text-5xl sm:text-6xl lg:text-7xl font-black mb-3 tracking-wide text-[#E2725B] leading-none"
                     >
                         THE END
                     </h2>
-                    <p ref={subTextLeftRef} className="font-['Caveat'] text-2xl sm:text-3xl opacity-80 max-w-[200px] leading-snug">
+                    <p ref={subTextLeftRef} className="font-['Caveat'] text-2xl sm:text-3xl opacity-80 max-w-[260px] leading-snug mt-1">
                         [ Or the beginning of us working together? ]
                     </p>
                 </div>
@@ -229,15 +229,15 @@ const Footer = () => {
                 {/* Right Column: SAY HEY */}
                 <div
                     ref={rightColRef}
-                    className="lg:col-span-3 flex flex-col items-center lg:items-end text-center lg:text-right order-3 lg:order-3"
+                    className="lg:col-span-3 flex flex-col items-center lg:items-end text-center lg:text-right order-3 lg:order-3 relative lg:-right-12"
                 >
                     <h2
                         ref={sayHeyRef}
-                        className="font-['Fredoka'] text-5xl sm:text-6xl lg:text-7xl font-black mb-4 tracking-wide text-[#E2725B]"
+                        className="font-['Fredoka'] text-5xl sm:text-6xl lg:text-7xl font-black mb-3 tracking-wide text-[#E2725B] leading-none"
                     >
                         SAY HEY
                     </h2>
-                    <p ref={subTextRightRef} className="font-['Plus_Jakarta_Sans'] font-bold text-sm sm:text-base opacity-70 uppercase max-w-[240px] mb-8 leading-relaxed">
+                    <p ref={subTextRightRef} className="font-['Plus_Jakarta_Sans'] font-bold text-xs sm:text-sm opacity-70 uppercase max-w-[280px] leading-relaxed mt-1 mb-6">
                         [ Available for projects, chats, or just a really long debate about system design ]
                     </p>
 

@@ -17,7 +17,8 @@ import { Home, User, FolderGit2, Briefcase, Mail } from "lucide-react";
 import CaseStudiesSection from "./CaseStudiesSection";
 import AboutMeSection from "./AboutMeSection";
 import Footer from "./Footer";
-import TechParticles from "./TechParticles";
+
+import InterestsSection, { TRACKS } from "./InterestsSection";
 
 // Register ScrollTrigger and Observer plugins with GSAP engine
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -128,11 +129,11 @@ export default function App() {
   const isScatteredRef = useRef(false);
 
   const iconData = [
-    { src: Comments, label: "Contact Me!!", isContact: true, link: null },
+    { src: Comments, label: "Connect!!", isContact: true, link: null },
     { src: Github, label: "GitHub", isGithub: true, link: "https://github.com/auniqueusername4me" },
     { src: Linkedin, label: "LinkedIn", isLinkedin: true, link: "https://www.linkedin.com/in/ayush-pachouri-a67427398" },
     { src: List, label: "CV", isResume: true, link: null },
-    { src: Vinyl1, label: "Interests", isVinyl: true, link: null },
+    { src: Vinyl1, label: "Music", isVinyl: true, link: null },
     { src: About, label: "About Me", isAbout: true, link: null },
     { src: DuckPng, label: "Duck", isDuck: true, link: null },
     { src: PlantPng, label: "Plant", isPlant: true, link: null },
@@ -149,11 +150,64 @@ export default function App() {
   // heroReady: gates the icon fade-in + Click Me animation.
   // Desktop: fires immediately after video. Mobile: fires after disclaimer is dismissed.
   const [heroReady, setHeroReady] = useState(false);
+  const [isInterestsOpen, setIsInterestsOpen] = useState(false);
+  const [activeTrack, setActiveTrack] = useState(TRACKS[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const tryPlay = () => {
+      if (isPlaying) {
+        if (audio.currentTime === 0 && activeTrack.startTime) {
+          audio.currentTime = activeTrack.startTime;
+        }
+        audio.play().catch(e => {
+          console.warn("Playback failed:", e);
+          setIsPlaying(false);
+        });
+      } else {
+        audio.pause();
+      }
+    };
+
+    if (audio.readyState >= 1) {
+      tryPlay();
+    }
+
+    const onLoadedMetadata = () => {
+      tryPlay();
+    };
+
+    audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    return () => {
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+    };
+  }, [isPlaying, activeTrack]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Scroll listener to hide heading/subheading past the hero section
+  useEffect(() => {
+    const handleScrollHiding = () => {
+      const isPastHero = window.scrollY > 150;
+      const titleContainer = document.getElementById("main-title-container");
+      if (titleContainer) {
+        if (isPastHero) {
+          gsap.to(titleContainer, { opacity: 0, pointerEvents: "none", duration: 0.25, overwrite: "auto" });
+        } else if (!isTidiedRef.current) {
+          gsap.to(titleContainer, { opacity: 1, pointerEvents: "auto", duration: 0.25, overwrite: "auto" });
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScrollHiding, { passive: true });
+    return () => window.removeEventListener("scroll", handleScrollHiding);
   }, []);
 
   // Keep refs in sync with state so event listeners always read the latest values
@@ -626,8 +680,7 @@ export default function App() {
     <div className="bg-[#FFEED6] min-h-screen w-full relative overflow-x-hidden">
       <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet" />
 
-      {/* Atmospheric floating tech particles */}
-      <TechParticles />
+
 
       <div className="pointer-events-none fixed inset-0 z-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.12)]" />
 
@@ -722,12 +775,12 @@ export default function App() {
         style={{ visibility: introDone ? "visible" : "hidden", height: "100vh" }}
       >
         <div ref={containerRef} onClick={!isScattered ? handleScatterOnce : undefined} onTouchEnd={!isScattered ? handleScatterOnce : undefined} onMouseEnter={handleContainerMouseEnter} onMouseLeave={handleContainerMouseLeave} className={`relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center select-none ${isScattered ? "cursor-default" : "cursor-pointer"}`}>
-          <div id="instagram-standalone-wrapper" ref={instaBoxRef} onMouseEnter={handleInstaMouseEnter} onMouseLeave={handleInstaMouseLeave} className="opacity-0 absolute -top-72 left-40 -translate-x-1/2 flex items-center gap-4 z-50 pointer-events-auto select-none">
+          <div id="instagram-standalone-wrapper" ref={instaBoxRef} onMouseEnter={handleInstaMouseEnter} onMouseLeave={handleInstaMouseLeave} className="opacity-0 absolute -top-72 left-40 -translate-x-1/2 flex items-center gap-4 z-50 pointer-events-none select-none">
             <a href="https://www.instagram.com/ayush_numbers/?hl=en" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative flex flex-col items-center justify-center cursor-pointer pointer-events-auto z-50">
               <div ref={instaTooltipRef} className="opacity-0 scale-0 pointer-events-none absolute -top-14 px-3.5 py-1.5 bg-[#2E2019] text-[#FFEED6] font-['Fredoka'] text-xs sm:text-sm font-bold rounded-full shadow-md whitespace-nowrap z-30">Instagram</div>
               <img src={InstagramPng} alt="Instagram" className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-md flex-shrink-0" />
             </a>
-            <div id="instagram-text-box" ref={instaTextBoxRef} className="hidden sm:flex bg-[#2E2019] text-[#FFEED6] px-6 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(46,32,25,0.25)] font-['Fredoka'] text-lg sm:text-xl font-bold tracking-wide text-center flex-col justify-center min-h-[72px] w-[280px] sm:w-[310px] pointer-events-none">
+            <div id="instagram-text-box" ref={instaTextBoxRef} className={`hidden sm:flex bg-[#2E2019] text-[#FFEED6] px-6 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(46,32,25,0.25)] font-['Fredoka'] text-lg sm:text-xl font-bold tracking-wide text-center flex-col justify-center min-h-[72px] w-[280px] sm:w-[310px] ${!isTidied ? 'pointer-events-auto' : 'pointer-events-none'}`}>
               <span className="block leading-tight">Make sure to follow me</span>
               <span className="block leading-tight text-[#FFEED6]/80 text-sm sm:text-base font-semibold mt-0.5">(I have zero followers)</span>
             </div>
@@ -773,6 +826,8 @@ export default function App() {
                         .to(drops, { opacity: 0, duration: 0.15, stagger: 0.12 }, 0.2)
                         .to(img, { scaleY: 1.15, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4);
                     }
+                  } else if (item.isVinyl) {
+                    setIsInterestsOpen(true);
                   } else if (item.isTerminal) {
                     setIsTerminalOpen(!isTerminalOpen);
                   } else if (item.isAbout) {
@@ -838,8 +893,8 @@ export default function App() {
                 <div id="vinyl-note-container" ref={vinylArrowRef} className="hidden sm:flex opacity-0 pointer-events-none absolute top-full mt-2 flex-col items-center z-30">
                   <img src={CurvedArrow} alt="Arrow" className="w-16 sm:w-20 h-auto select-none pointer-events-none" />
                   <div className="bg-[#2E2019] mt-1 text-[#FFEED6] px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl shadow-2xl font-['Fredoka'] text-center whitespace-nowrap">
-                    <span className="block text-base sm:text-lg font-bold tracking-wide">Things that I like</span>
-                    <span className="block text-sm sm:text-base font-bold text-[#FFEED6]/80 mt-0.5">(My Interests)</span>
+                    <span className="block text-base sm:text-lg font-bold tracking-wide">Vibes & Rhythm</span>
+                    <span className="block text-sm sm:text-base font-bold text-[#FFEED6]/80 mt-0.5">(My Music)</span>
                   </div>
                 </div>
               )}
@@ -897,9 +952,62 @@ export default function App() {
 
       {/* About Me Section in natural page flow */}
       {introDone && <AboutMeSection ref={aboutMeRef} />}
-
-      {/* Main Footer */}
       {introDone && <Footer />}
+      {/* Global Persistent Audio Element */}
+      <audio 
+        ref={audioRef} 
+        src={activeTrack.src} 
+        preload="auto"
+        onEnded={() => setIsPlaying(false)}
+      />
+
+      {/* Pinned Vinyl Icon / Widget when music is playing */}
+      {isPlaying && (
+        <div 
+          onClick={() => setIsPlaying(false)}
+          className="fixed top-6 right-6 z-[90] cursor-pointer flex items-center bg-[#2E2019] text-[#FFEED6] p-2.5 pr-5 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.4)] border-2 border-[#E2725B] hover:scale-105 active:scale-95 transition-all group pointer-events-auto select-none"
+        >
+          <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-[#FFEED6]/20">
+            <img 
+              src={activeTrack.cover} 
+              alt="Vinyl Playing" 
+              className="w-full h-full object-cover animate-spin" 
+              style={{ animationDuration: '4s' }}
+            />
+            <div className="absolute inset-0 bg-black/20 rounded-full"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FFEED6]"></div>
+            </div>
+          </div>
+          <div className="ml-3 flex flex-col overflow-hidden">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black uppercase text-[#E2725B] tracking-wider">Now Playing</span>
+              <span className="flex items-end space-x-0.5 h-2.5">
+                <span className="w-1 bg-[#E2725B] rounded-t-sm animate-bounce" style={{ height: "60%", animationDuration: "0.4s" }}></span>
+                <span className="w-1 bg-[#E2725B] rounded-t-sm animate-bounce" style={{ height: "100%", animationDuration: "0.6s" }}></span>
+                <span className="w-1 bg-[#E2725B] rounded-t-sm animate-bounce" style={{ height: "40%", animationDuration: "0.5s" }}></span>
+              </span>
+            </div>
+            <span className="text-sm font-bold text-[#FFEED6] truncate max-w-[140px] leading-tight group-hover:hidden" style={{ fontFamily: "'Fredoka', sans-serif" }}>
+              {activeTrack.title}
+            </span>
+            <span className="text-sm font-bold text-[#E2725B] truncate max-w-[140px] leading-tight hidden group-hover:block" style={{ fontFamily: "'Fredoka', sans-serif" }}>
+              Stop Music
+            </span>
+          </div>
+        </div>
+      )}
+
+      {isInterestsOpen && (
+        <InterestsSection 
+          onClose={() => setIsInterestsOpen(false)} 
+          activeTrack={activeTrack}
+          setActiveTrack={setActiveTrack}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+          audioRef={audioRef}
+        />
+      )}
     </div>
   );
 }
