@@ -13,7 +13,7 @@ import { Observer } from "gsap/Observer";
 // Import GSAP's official React hook for safe lifecycle management
 import { useGSAP } from "@gsap/react";
 // Import Lucide icons for Glass Navigation
-import { Home, User, FolderGit2, Briefcase, Mail } from "lucide-react";
+import { Home, User, FolderGit2, Briefcase, Mail, Link } from "lucide-react";
 import CaseStudiesSection from "./CaseStudiesSection";
 import AboutMeSection from "./AboutMeSection";
 import Footer from "./Footer";
@@ -647,7 +647,7 @@ export default function App() {
 
   const cornerNavItem = { id: "home", label: "Home", icon: Home };
   const rightNavItems = [{ id: "about", label: "About", icon: User }, { id: "case-studies", label: "Case Studies", icon: FolderGit2 }];
-  const downNavItems = [{ id: "resume", label: "CV", icon: Briefcase }, { id: "contact", label: "Contact", icon: Mail }];
+  const downNavItems = [{ id: "resume", label: "CV", icon: Briefcase }, { id: "connect", label: "Connect", icon: Link }];
 
   const handleNavClick = (e, id) => {
     e.stopPropagation();
@@ -669,6 +669,11 @@ export default function App() {
       setTimeout(() => {
         const element = document.getElementById("about-me-section");
         if (element) element.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else if (id === "connect") {
+      if (!isTidied) handleTidyFlanks(true);
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       }, 100);
     }
   };
@@ -843,6 +848,15 @@ export default function App() {
                     }
                   } else if (item.isResume) {
                     window.open("https://drive.usercontent.google.com/download?id=1J9eMbBf62-NYkyTMx_HyjAC6XcZQTKZV&export=download&authuser=0", "_blank");
+                  } else if (item.isContact) {
+                    if (!isTidiedRef.current) {
+                      isAnimatingRef.current = true;
+                      handleTidyFlanks(true);
+                      setTimeout(() => { isAnimatingRef.current = false; }, 1100);
+                    }
+                    setTimeout(() => {
+                      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                    }, 100);
                   } else if (item.link) {
                     window.open(item.link, "_blank");
                   }
