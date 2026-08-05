@@ -385,22 +385,39 @@ export default function App() {
   const updateScatterPositions = contextSafe(() => {
     if (!isScattered || isTidied) return;
     const width = window.innerWidth;
-    const isMobile = width < 640;
+    const height = window.innerHeight;
 
-    if (isMobile) {
+    if (width < 640) {
+      // Mobile
       const edge = width / 2;
       scatterTargets.current = [
-        { x: -(edge - 32), y: -210, rotation: -12 },
-        { x:  (edge - 32), y: -150, rotation:  10 },
-        { x: -(edge - 32), y:  -50, rotation:  -8 },
-        { x:  (edge - 32), y:   40, rotation:  12 },
-        { x: -(edge - 32), y:  160, rotation:  15 },
-        { x:  (edge - 32), y:  -90, rotation:  -9 },
-        { x: -(edge - 32), y:  -80, rotation:   8 },
-        { x:  (edge - 32), y:  200, rotation: -14 },
-        { x: -(edge - 32), y:  280, rotation: -10 },
+        { x: -(edge - 32), y: -height * 0.25, rotation: -12 },
+        { x:  (edge - 32), y: -height * 0.18, rotation:  10 },
+        { x: -(edge - 32), y:  -height * 0.06, rotation:  -8 },
+        { x:  (edge - 32), y:   height * 0.05, rotation:  12 },
+        { x: -(edge - 32), y:  height * 0.19, rotation:  15 },
+        { x:  (edge - 32), y:  -height * 0.11, rotation:  -9 },
+        { x: -(edge - 32), y:  -height * 0.10, rotation:   8 },
+        { x:  (edge - 32), y:  height * 0.24, rotation: -14 },
+        { x: -(edge - 32), y:  height * 0.33, rotation: -10 },
+      ];
+    } else if (width < 1024) {
+      // Tablet / Small Laptops
+      const edgeX = width * 0.40;
+      const edgeY = height * 0.35;
+      scatterTargets.current = [
+        { x: -edgeX + 40, y: -edgeY + 60, rotation: -15 },
+        { x: -edgeX - 10, y: 0, rotation: -10 },
+        { x: -edgeX + 60, y: edgeY - 50, rotation: 12 },
+        { x: edgeX - 50, y: -edgeY + 40, rotation: -14 },
+        { x: edgeX - 20, y: edgeY - 60, rotation: 15 },
+        { x: edgeX * 0.1, y: edgeY - 20, rotation: -8 },
+        { x: edgeX - 10, y: edgeY * 0.4, rotation: 10 },
+        { x: -edgeX + 30, y: edgeY - 10, rotation: -18 },
+        { x: edgeX - 60, y: -edgeY * 0.2, rotation: -12 },
       ];
     } else {
+      // Desktop
       const xDistStd = width * 0.28, xDistFar = width * 0.35, xDistEdge = width * 0.40, xDistRC = width * 0.42;
       scatterTargets.current = [
         { x: -xDistFar, y: -220, rotation: -25 }, { x: -xDistEdge - 70, y: 0, rotation: -12 }, { x: -xDistStd + 80, y: 250, rotation: 18 },
@@ -779,23 +796,23 @@ export default function App() {
         className="w-full flex items-center justify-center relative z-20"
         style={{ visibility: introDone ? "visible" : "hidden", height: "100vh" }}
       >
-        <div ref={containerRef} onClick={!isScattered ? handleScatterOnce : undefined} onTouchEnd={!isScattered ? handleScatterOnce : undefined} onMouseEnter={handleContainerMouseEnter} onMouseLeave={handleContainerMouseLeave} className={`relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center select-none ${isScattered ? "cursor-default" : "cursor-pointer"}`}>
-          <div id="instagram-standalone-wrapper" ref={instaBoxRef} onMouseEnter={handleInstaMouseEnter} onMouseLeave={handleInstaMouseLeave} className="opacity-0 absolute -top-72 left-40 -translate-x-1/2 flex items-center gap-4 z-50 pointer-events-none select-none">
+        <div ref={containerRef} onClick={!isScattered ? handleScatterOnce : undefined} onTouchEnd={!isScattered ? handleScatterOnce : undefined} onMouseEnter={handleContainerMouseEnter} onMouseLeave={handleContainerMouseLeave} className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-40 xl:h-40 flex items-center justify-center select-none ${isScattered ? "cursor-default" : "cursor-pointer"}`}>
+          <div id="instagram-standalone-wrapper" ref={instaBoxRef} onMouseEnter={handleInstaMouseEnter} onMouseLeave={handleInstaMouseLeave} className="opacity-0 absolute -top-40 md:-top-72 left-20 md:left-40 -translate-x-1/2 flex items-center gap-4 z-50 pointer-events-none select-none">
             <a href="https://www.instagram.com/ayush_numbers/?hl=en" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative flex flex-col items-center justify-center cursor-pointer pointer-events-auto z-50">
               <div ref={instaTooltipRef} className="opacity-0 scale-0 pointer-events-none absolute -top-14 px-3.5 py-1.5 bg-[#2E2019] text-[#FFEED6] font-['Fredoka'] text-xs sm:text-sm font-bold rounded-full shadow-md whitespace-nowrap z-30">Instagram</div>
-              <img src={InstagramPng} alt="Instagram" className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-md flex-shrink-0" />
+              <img src={InstagramPng} alt="Instagram" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain drop-shadow-md flex-shrink-0" />
             </a>
-            <div id="instagram-text-box" ref={instaTextBoxRef} className={`hidden sm:flex bg-[#2E2019] text-[#FFEED6] px-6 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(46,32,25,0.25)] font-['Fredoka'] text-lg sm:text-xl font-bold tracking-wide text-center flex-col justify-center min-h-[72px] w-[280px] sm:w-[310px] ${!isTidied ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+            <div id="instagram-text-box" ref={instaTextBoxRef} className={`hidden sm:flex bg-[#2E2019] text-[#FFEED6] px-4 py-2 md:px-6 md:py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(46,32,25,0.25)] font-['Fredoka'] text-sm md:text-lg lg:text-xl font-bold tracking-wide text-center flex-col justify-center min-h-[60px] md:min-h-[72px] w-[220px] md:w-[280px] lg:w-[310px] ${!isTidied ? 'pointer-events-auto' : 'pointer-events-none'}`}>
               <span className="block leading-tight">Make sure to follow me</span>
-              <span className="block leading-tight text-[#FFEED6]/80 text-sm sm:text-base font-semibold mt-0.5">(I have zero followers)</span>
+              <span className="block leading-tight text-[#FFEED6]/80 text-xs sm:text-sm md:text-base font-semibold mt-0.5">(I have zero followers)</span>
             </div>
           </div>
 
-          <div id="main-title-container" className="absolute -top-40 sm:-top-36 flex flex-col items-center justify-center text-center z-40 pointer-events-none select-none w-screen p-2">
-            <div id="name-badge-container" ref={nameBadgeRef} className="opacity-0 mb-3 sm:mb-4 bg-[#2E2019] text-[#FFEED6] px-6 py-2.5 sm:px-8 sm:py-3 rounded-2xl shadow-[0_10px_30px_rgba(46,32,25,0.2)] font-['Fredoka'] text-sm sm:text-xl font-bold tracking-wide pointer-events-none">
+          <div id="main-title-container" className="absolute -top-32 sm:-top-36 md:-top-40 flex flex-col items-center justify-center text-center z-40 pointer-events-none select-none w-screen p-2 overflow-hidden">
+            <div id="name-badge-container" ref={nameBadgeRef} className="opacity-0 mb-3 sm:mb-4 bg-[#2E2019] text-[#FFEED6] px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-2xl shadow-[0_10px_30px_rgba(46,32,25,0.2)] font-['Fredoka'] text-sm sm:text-base md:text-lg lg:text-xl font-bold tracking-wide pointer-events-none max-w-[90vw]">
               <span>Hey!! I am Ayush👋</span>
             </div>
-            <div id="main-title-text" ref={mainTitleRef} className="opacity-0 bg-[#2E2019] text-[#FFEED6] px-6 py-5 sm:px-12 sm:py-8 rounded-[2rem] shadow-[0_20px_50px_rgba(46,32,25,0.28)] font-['Fredoka'] text-base sm:text-3xl font-black tracking-wide max-w-[90vw] sm:max-w-[600px] mb-3 sm:mb-5 leading-snug flex flex-wrap justify-center relative z-20 pointer-events-none">
+            <div id="main-title-text" ref={mainTitleRef} className="opacity-0 bg-[#2E2019] text-[#FFEED6] px-4 py-3 sm:px-8 sm:py-5 md:px-12 md:py-8 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_50px_rgba(46,32,25,0.28)] font-['Fredoka'] text-sm sm:text-xl md:text-2xl lg:text-3xl font-black tracking-wide max-w-[95vw] sm:max-w-[80vw] md:max-w-[70vw] lg:max-w-[600px] mb-3 sm:mb-5 leading-snug flex flex-wrap justify-center relative z-20 pointer-events-none overflow-hidden">
               {/* Always render word-by-word to prevent mid-word breaks; char-spans still exist for GSAP targeting */}
               {headlineText.split(" ").map((word, i, arr) => (
                   <span key={i} className="scroll-char inline-block whitespace-nowrap">
@@ -803,7 +820,7 @@ export default function App() {
                   </span>
               ))}
             </div>
-            <div id="sub-heading-container" ref={subHeadingRef} className="opacity-0 mt-1 sm:mt-4 bg-[#2E2019] text-[#FFEED6] px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-2xl font-['Fredoka'] text-sm sm:text-2xl font-bold tracking-wide whitespace-nowrap max-w-[92vw] relative z-10 pointer-events-none">
+            <div id="sub-heading-container" ref={subHeadingRef} className="opacity-0 mt-1 sm:mt-2 md:mt-4 bg-[#2E2019] text-[#FFEED6] px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3.5 rounded-2xl font-['Fredoka'] text-xs sm:text-lg md:text-xl lg:text-2xl font-bold tracking-wide whitespace-nowrap max-w-[92vw] overflow-hidden relative z-10 pointer-events-none">
               <span id="sub-heading-text">Scroll Down To Unscatter</span>
             </div>
           </div>
@@ -867,10 +884,10 @@ export default function App() {
               <div ref={addToTooltipsRef} className="opacity-0 scale-0 pointer-events-none absolute -top-10 px-3 py-1 bg-[#2E2019] text-[#FFEED6] font-['Fredoka'] text-xs sm:text-sm font-bold rounded-full shadow-md whitespace-nowrap z-30">{item.label}</div>
               {item.link && isScattered ? (
                 <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="cursor-pointer pointer-events-auto z-30">
-                  <img ref={addToImgRefs} src={item.src} alt={item.label} className="w-16 sm:w-24 h-auto rounded-xl" />
+                  <img ref={addToImgRefs} src={item.src} alt={item.label} className="w-16 sm:w-20 md:w-24 lg:w-28 xl:w-32 h-auto rounded-xl" />
                 </a>
               ) : (
-                <img ref={addToImgRefs} src={item.src} alt={item.label} className={`w-16 sm:w-24 h-auto rounded-xl ${!isScattered ? "cursor-pointer" : ""}`} />
+                <img ref={addToImgRefs} src={item.src} alt={item.label} className={`w-16 sm:w-20 md:w-24 lg:w-28 xl:w-32 h-auto rounded-xl ${!isScattered ? "cursor-pointer" : ""}`} />
               )}
               {/* Additional Popups Hidden for Brevity in Display, Rendered in Component */}
               {item.isContact && (
